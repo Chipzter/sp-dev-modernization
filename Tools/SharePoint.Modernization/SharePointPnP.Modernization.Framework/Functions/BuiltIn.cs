@@ -1,6 +1,5 @@
 ﻿using AngleSharp;
-using AngleSharp.Html.Parser;
-using AngleSharp.Io;
+using AngleSharp.Parser.Html;
 using Microsoft.SharePoint.Client;
 using OfficeDevPnP.Core.Pages;
 using SharePointPnP.Modernization.Framework.Telemetry;
@@ -311,13 +310,11 @@ namespace SharePointPnP.Modernization.Framework.Functions
                 return false;
             }
 
-            var config = Configuration.Default.WithDefaultLoader(new LoaderOptions { IsResourceLoadingEnabled = true }).WithCss();
-            var context = BrowsingContext.New(config);
-            HtmlParser parser = new HtmlParser(new HtmlParserOptions { IsEmbedded = true }, context);
+            HtmlParser parser = new HtmlParser(new HtmlParserOptions() { IsEmbedded = true }, Configuration.Default.WithDefaultLoader().WithCss());
 
             try
             {
-                var doc = parser.ParseDocument(content);
+                var doc = parser.Parse(content);
                 // Script information
                 var scriptTags = doc.All.Where(p => p.LocalName == "script");
                 if (scriptTags.Count() > 0)
@@ -799,7 +796,7 @@ namespace SharePointPnP.Modernization.Framework.Functions
             }
 
             HtmlParser parser = new HtmlParser(new HtmlParserOptions() { IsEmbedded = true });
-            using (var document = parser.ParseDocument(clientSideWebPartHtml))
+            using (var document = parser.Parse(clientSideWebPartHtml))
             {
                 return document.Body.FirstElementChild.GetAttribute("data-sp-webpartdata");
             }

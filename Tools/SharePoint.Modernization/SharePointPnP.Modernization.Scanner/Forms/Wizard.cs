@@ -96,20 +96,15 @@ namespace SharePoint.Modernization.Scanner.Forms
             }
             else if (cmbScanMode.SelectedIndex == 7)
             {
-                // Workflow detailed
-                options.Mode = Mode.WorkflowWithDetailsOnly;
-            }
-            else if (cmbScanMode.SelectedIndex == 8)
-            {
                 // InfoPath
                 options.Mode = Mode.InfoPathOnly;
             }
-            else if (cmbScanMode.SelectedIndex == 9)
+            else if (cmbScanMode.SelectedIndex == 8)
             {
                 // Blog
                 options.Mode = Mode.BlogOnly;
             }
-            else if (cmbScanMode.SelectedIndex == 10)
+            else if (cmbScanMode.SelectedIndex == 9)
             {
                 // Full
                 options.Mode = Mode.Full;
@@ -393,7 +388,6 @@ namespace SharePoint.Modernization.Scanner.Forms
                 tgModePublishing.Checked = false;
                 tgModePublishingDetailed.Checked = false;
                 tgModeClassicWorkflowUsage.Checked = false;
-                tgModeClassicWorkflowUsageDetailed.Checked = false;
                 tgModeInfoPathUsage.Checked = false;
                 tgModeBlogUsage.Checked = false;
             }
@@ -407,7 +401,6 @@ namespace SharePoint.Modernization.Scanner.Forms
                 tgModePublishing.Checked = false;
                 tgModePublishingDetailed.Checked = false;
                 tgModeClassicWorkflowUsage.Checked = false;
-                tgModeClassicWorkflowUsageDetailed.Checked = false;
                 tgModeInfoPathUsage.Checked = false;
                 tgModeBlogUsage.Checked = false;
             }
@@ -421,7 +414,6 @@ namespace SharePoint.Modernization.Scanner.Forms
                 tgModePublishing.Checked = false;
                 tgModePublishingDetailed.Checked = false;
                 tgModeClassicWorkflowUsage.Checked = false;
-                tgModeClassicWorkflowUsageDetailed.Checked = false;
                 tgModeInfoPathUsage.Checked = false;
                 tgModeBlogUsage.Checked = false;
             }
@@ -435,7 +427,6 @@ namespace SharePoint.Modernization.Scanner.Forms
                 tgModePublishing.Checked = false;
                 tgModePublishingDetailed.Checked = false;
                 tgModeClassicWorkflowUsage.Checked = false;
-                tgModeClassicWorkflowUsageDetailed.Checked = false;
                 tgModeInfoPathUsage.Checked = false;
                 tgModeBlogUsage.Checked = false;
             }
@@ -449,7 +440,6 @@ namespace SharePoint.Modernization.Scanner.Forms
                 tgModePublishing.Checked = true;
                 tgModePublishingDetailed.Checked = false;
                 tgModeClassicWorkflowUsage.Checked = false;
-                tgModeClassicWorkflowUsageDetailed.Checked = false;
                 tgModeInfoPathUsage.Checked = false;
                 tgModeBlogUsage.Checked = false;
             }
@@ -463,7 +453,6 @@ namespace SharePoint.Modernization.Scanner.Forms
                 tgModePublishing.Checked = true;
                 tgModePublishingDetailed.Checked = true;
                 tgModeClassicWorkflowUsage.Checked = false;
-                tgModeClassicWorkflowUsageDetailed.Checked = false;
                 tgModeInfoPathUsage.Checked = false;
                 tgModeBlogUsage.Checked = false;
             }
@@ -477,25 +466,10 @@ namespace SharePoint.Modernization.Scanner.Forms
                 tgModePublishing.Checked = false;
                 tgModePublishingDetailed.Checked = false;
                 tgModeClassicWorkflowUsage.Checked = true;
-                tgModeClassicWorkflowUsageDetailed.Checked = false;
                 tgModeInfoPathUsage.Checked = false;
                 tgModeBlogUsage.Checked = false;
             }
             else if (cmbScanMode.SelectedIndex == 7)
-            {
-                // Workflow scanning detailed
-                tgModeGroupConnect.Checked = true;
-                tgModeList.Checked = false;
-                tgModeHomePageOnly.Checked = false;
-                tgModePages.Checked = false;
-                tgModePublishing.Checked = false;
-                tgModePublishingDetailed.Checked = false;
-                tgModeClassicWorkflowUsage.Checked = true;
-                tgModeClassicWorkflowUsageDetailed.Checked = true;
-                tgModeInfoPathUsage.Checked = false;
-                tgModeBlogUsage.Checked = false;
-            }
-            else if (cmbScanMode.SelectedIndex == 8)
             {
                 // InfoPath scanning
                 tgModeGroupConnect.Checked = true;
@@ -505,11 +479,10 @@ namespace SharePoint.Modernization.Scanner.Forms
                 tgModePublishing.Checked = false;
                 tgModePublishingDetailed.Checked = false;
                 tgModeClassicWorkflowUsage.Checked = false;
-                tgModeClassicWorkflowUsageDetailed.Checked = false;
                 tgModeInfoPathUsage.Checked = true;
                 tgModeBlogUsage.Checked = false;
             }
-            else if (cmbScanMode.SelectedIndex == 9)
+            else if (cmbScanMode.SelectedIndex == 8)
             {
                 // Blog scanning
                 tgModeGroupConnect.Checked = true;
@@ -519,11 +492,10 @@ namespace SharePoint.Modernization.Scanner.Forms
                 tgModePublishing.Checked = false;
                 tgModePublishingDetailed.Checked = false;
                 tgModeClassicWorkflowUsage.Checked = false;
-                tgModeClassicWorkflowUsageDetailed.Checked = false;
                 tgModeInfoPathUsage.Checked = false;
                 tgModeBlogUsage.Checked = true;
             }
-            else if (cmbScanMode.SelectedIndex == 10)
+            else if (cmbScanMode.SelectedIndex == 9)
             {
                 // Full
                 tgModeGroupConnect.Checked = true;
@@ -533,7 +505,6 @@ namespace SharePoint.Modernization.Scanner.Forms
                 tgModePublishing.Checked = true;
                 tgModePublishingDetailed.Checked = true;
                 tgModeClassicWorkflowUsage.Checked = true;
-                tgModeClassicWorkflowUsageDetailed.Checked = true;
                 tgModeInfoPathUsage.Checked = true;
                 tgModeBlogUsage.Checked = true;
             }

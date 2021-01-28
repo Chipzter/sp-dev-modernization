@@ -23,7 +23,6 @@ namespace SharePoint.Modernization.Scanner.Core
         PublishingWithPagesOnly,
         ListOnly,
         WorkflowOnly,
-        WorkflowWithDetailsOnly,
         InfoPathOnly,
         BlogOnly,
         HomePageOnly,
@@ -104,7 +103,7 @@ namespace SharePoint.Modernization.Scanner.Core
         public string Separator { get; set; }
         #endregion
 
-        [Option('m', "mode", HelpText = "Execution mode. Use following modes: Full, GroupifyOnly, ListOnly, PageOnly, HomePageOnly, PublishingOnly, PublishingWithPagesOnly, WorkflowOnly, WorkflowWithDetailsOnly, InfoPathOnly or BlogOnly. Omit or use full for a full scan", DefaultValue = Mode.Full, Required = false)]
+        [Option('m', "mode", HelpText = "Execution mode. Use following modes: Full, GroupifyOnly, ListOnly, PageOnly, HomePageOnly, PublishingOnly, PublishingWithPagesOnly, WorkflowOnly, InfoPathOnly or BlogOnly. Omit or use full for a full scan", DefaultValue = Mode.Full, Required = false)]
         public Mode Mode { get; set; }
 
         [Option('b', "exportwebpartproperties", HelpText = "Export the web part property data", DefaultValue = false, Required = false)]
@@ -419,25 +418,6 @@ namespace SharePoint.Modernization.Scanner.Core
             return false;
         }
 
-        /// <summary>
-        /// Include workflow analysis
-        /// </summary>
-        /// <param name="mode">mode that was provided</param>
-        /// <returns>True if included, false otherwise</returns>
-        public static bool IncludeWorkflowWithDetails(Mode mode)
-        {
-            if (mode == Mode.Full)
-            {
-                return true;
-            }
-            
-            if (mode == Mode.WorkflowWithDetailsOnly)
-            {
-                return true;
-            }
-
-            return false;
-        }
 
         /// <summary>
         /// Include InfoPath analysis

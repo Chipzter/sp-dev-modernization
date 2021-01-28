@@ -4,52 +4,7 @@
 
 See https://aka.ms/sppnp-modernizationscanner
 
-## [Version 2.18]
-
-## Added
-
-## Changed
-
-- Workflows on list content types are now included
-
-## [Version 2.17]
-
-## Added
-
-## Changed
-
-- Prevent scanning the root site from issuing a search query that would return all sites
-- Removed the Delve blog scanning feature as Delve has been removed from SPO
-
-## [Version 2.16]
-
-## Added
-
-## Changed
-
-- Previous workflow versions are now correclty excluded, also when the site was created using a non-Enlish language #518
-- Prevent rapid exit without waiting for the user to read error (if anything throws) #511 [victorbutuza]
-- Also process 2010 WF activities from the Microsoft.SharePoint.WorkflowActions.WithKey namespace
-
-## [Version 2.15]
-
-## Added
-
-## Changed
-
-- Fixed bug in search code that resulted in an infinite search loop [Chipzter]
-
-## [Version 2.14]
-
-## Added
-
-- Option to scan for workflows without analyzing the workflows (increases performance)
-
-## Changed
-
-- Scanner now outputs CSV results each minute
-
-## [Version 2.13]
+## Unreleased
 
 ### Added
 

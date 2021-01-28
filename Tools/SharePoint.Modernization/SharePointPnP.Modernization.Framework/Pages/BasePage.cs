@@ -1,6 +1,6 @@
 ﻿using AngleSharp.Dom;
-using AngleSharp.Html.Dom;
-using AngleSharp.Html.Parser;
+using AngleSharp.Dom.Html;
+using AngleSharp.Parser.Html;
 using Microsoft.SharePoint.Client;
 using Microsoft.SharePoint.Client.WebParts;
 using SharePointPnP.Modernization.Framework.Entities;
@@ -551,7 +551,7 @@ namespace SharePointPnP.Modernization.Framework.Pages
         /// <returns>True if it contains a web part</returns>
         private bool ContainsWebPart(IHtmlElement element)
         {
-            var doc = parser.ParseDocument(element.OuterHtml);
+            var doc = parser.Parse(element.OuterHtml);
             var nodes = doc.All.Where(p => p.LocalName == "div");
             foreach (var node in nodes)
             {
@@ -571,7 +571,7 @@ namespace SharePointPnP.Modernization.Framework.Pages
         private string StripWebPart(IHtmlElement element)
         {
             IElement copy = element.Clone(true) as IElement;
-            var doc = parser.ParseDocument(copy.OuterHtml);
+            var doc = parser.Parse(copy.OuterHtml);
             var nodes = doc.All.Where(p => p.LocalName == "div");
             if (nodes.Count() > 0)
             {
@@ -1080,7 +1080,7 @@ namespace SharePointPnP.Modernization.Framework.Pages
 
             if (!string.IsNullOrEmpty(wsWebParts.Item2))
             {
-                var doc = parser.ParseDocument(wsWebParts.Item2);
+                var doc = parser.Parse(wsWebParts.Item2);
 
                 List<Tuple<string, string>> prefixesAndNameSpaces = ExtractWebPartPrefixesFromNamespaces(doc);
                 List<Tuple<string, string>> possibleWebPartsUsed = new List<Tuple<string, string>>();
@@ -1219,7 +1219,7 @@ namespace SharePointPnP.Modernization.Framework.Pages
             }
 
             var fullBlock = blockHtml.ToString();
-            using (var subDocument = this.parser.ParseDocument(fullBlock))
+            using (var subDocument = this.parser.Parse(fullBlock))
             {
                 var registers = subDocument.All.Where(o => o.TagName == "REGISTER");
 
@@ -1352,19 +1352,13 @@ namespace SharePointPnP.Modernization.Framework.Pages
                                         }
 
                                         // Use regex to extract the controlId value from the string 
-                                        Regex controlIdStringRegex = new Regex($"ID=\"(.*?)\".*?{wsWebPartPropertiesEntity.Id.ToString()}", RegexOptions.IgnoreCase);
-                                        var controlIdStringMatch = controlIdStringRegex.Match(webpartPage);
-                                        //
-                                        if (controlIdStringMatch != null && controlIdStringMatch.Success)
+                                        var controlIdMatch = ControlIdRegex.Match(match.Value);
+                                        if (controlIdMatch != null && controlIdMatch.Success)
                                         {
-                                            var controlIdMatch = ControlIdRegex.Match(controlIdStringMatch.Value);
-                                            if (controlIdMatch != null && controlIdMatch.Success)
-                                            {
-                                                // returned value = ID="g_2b71545a_4278_4714_a26b_713b5365f44d"
+                                            // returned value = ID="g_2b71545a_4278_4714_a26b_713b5365f44d"
 
-                                                // set ControlId property
-                                                wsWebPartPropertiesEntity.ControlId = controlIdMatch.Value.Replace("ID=\"", "", StringComparison.InvariantCultureIgnoreCase).Replace("\"", "");
-                                            }
+                                            // set ControlId property
+                                            wsWebPartPropertiesEntity.ControlId = controlIdMatch.Value.Replace("ID=\"", "", StringComparison.InvariantCultureIgnoreCase).Replace("\"", "");
                                         }
                                     }
                                 }                                

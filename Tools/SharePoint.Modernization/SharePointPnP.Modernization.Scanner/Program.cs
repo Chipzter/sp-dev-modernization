@@ -151,7 +151,7 @@ namespace SharePoint.Modernization.Scanner
                     //Instantiate scan job
                     ModernizationScanJob job = new ModernizationScanJob(options, null, null)
                     {
-                        WorkingFolder = workingFolder,
+
                         // I'm debugging
                         //UseThreading = false
                     };
@@ -229,7 +229,7 @@ namespace SharePoint.Modernization.Scanner
                             PersistStream($"{workingFolder}\\{Generator.PublishingReport}", publishingReport);
                         }
 
-                        if (Options.IncludeWorkflow(options.Mode) || Options.IncludeWorkflowWithDetails(options.Mode))
+                        if (Options.IncludeWorkflow(options.Mode))
                         {
                             var workflowReport = generator.CreateWorkflowReport(reportStreams);
                             PersistStream($"{workingFolder}\\{Generator.WorkflowReport}", workflowReport);
@@ -259,11 +259,6 @@ namespace SharePoint.Modernization.Scanner
                     {
                         scannerTelemetry.LogScanDone(duration);
                     }
-                }
-                catch (Exception Ex)
-                {
-                    Console.WriteLine("Error executing scan: \n"+Ex.Message+ "\n Press any key to continue");
-                    Console.ReadKey();
                 }
                 finally
                 {
