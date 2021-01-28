@@ -12,25 +12,7 @@
 - From .Net: see https://docs.microsoft.com/en-us/sharepoint/dev/transform/modernize-userinterface-site-pages-dotnet as nice sample to start with
 - From PnP PowerShell: see https://docs.microsoft.com/en-us/sharepoint/dev/transform/modernize-userinterface-site-pages-powershell for a sample
 
-## [December release - version 1.0.2012.0]
-
-- Enabled metadata copy of taxonomy and user fields during in-place page modernization [jansenbe - Bert Jansen]
-- Bumped to AngleSharp version 0.14 [jansenbe - Bert Jansen]
-
-## [October release - version 1.0.2010.0]
-
-- No changes done
-
-## [September release - version 1.0.2009.0]
-
-- No changes done
-
-## [August release - version 1.0.2008.1]
-
-- Improved detection of zone id and web part id when transforming from SharePoint 2010 #517 [albegut]
-- Additional input for custom addons constructors - requires updating existing add-ins to match the new constructor requirement #516 [albegut]
-
-## [August release - version 1.0.2008.0]
+## [Unreleased]
 
 - Fixed bug with replacement of URLs + tests #499 (fixes #495) [pkbullock]
 
