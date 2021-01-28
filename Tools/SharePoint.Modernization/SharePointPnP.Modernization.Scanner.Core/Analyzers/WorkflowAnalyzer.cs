@@ -76,14 +76,16 @@ namespace SharePoint.Modernization.Scanner.Core.Analyzers
                 Web web = cc.Web;
 
                 // Pre-load needed properties in a single call
-                cc.Load(web, w => w.Id, w => w.ServerRelativeUrl, w => w.Url, w => w.WorkflowTemplates, w => w.WorkflowAssociations);
+                cc.Load(web, w => w.Id, w => w.Language, w => w.ServerRelativeUrl, w => w.Url, w => w.WorkflowTemplates, w => w.WorkflowAssociations);
                 cc.Load(web, p => p.ContentTypes.Include(ct => ct.WorkflowAssociations, ct => ct.Name, ct => ct.StringId));
-                cc.Load(web, p=>p.Lists.Include(li => li.Id, li => li.Title, li => li.Hidden, li => li.DefaultViewUrl, li => li.BaseTemplate , li => li.RootFolder.ServerRelativeUrl, li => li.ItemCount, li => li.WorkflowAssociations));
+                cc.Load(web, p=>p.Lists.Include(li => li.Id, li => li.Title, li => li.Hidden, li => li.DefaultViewUrl, li => li.BaseTemplate , li => li.RootFolder.ServerRelativeUrl, li => li.ItemCount, li => li.WorkflowAssociations, li => li.ContentTypesEnabled, li=> li.ContentTypes.Include(ct => ct.WorkflowAssociations, ct => ct.Name, ct => ct.StringId)));
                 cc.Load(cc.Site, p => p.RootWeb);
-                cc.Load(cc.Site.RootWeb, p => p.Lists.Include(li => li.Id, li => li.Title, li => li.Hidden, li => li.DefaultViewUrl, li => li.BaseTemplate, li => li.RootFolder.ServerRelativeUrl, li => li.ItemCount, li => li.WorkflowAssociations));
+                cc.Load(cc.Site.RootWeb, p => p.Lists.Include(li => li.Id, li => li.Title, li => li.Hidden, li => li.DefaultViewUrl, li => li.BaseTemplate, li => li.RootFolder.ServerRelativeUrl, li => li.ItemCount, li => li.WorkflowAssociations, li => li.ContentTypesEnabled, li => li.ContentTypes.Include(ct => ct.WorkflowAssociations, ct => ct.Name, ct => ct.StringId)));
                 cc.ExecuteQueryRetry();
 
                 var lists = web.Lists;
+
+                #region 2013 workflow
 
                 // *******************************************
                 // Site, reusable and list level 2013 workflow
@@ -126,8 +128,13 @@ namespace SharePoint.Modernization.Scanner.Core.Analyzers
                         var siteWorkflowSubscriptions = siteSubscriptions.Where(p => p.DefinitionId.Equals(siteDefinition.Id));
 
                         // Perform workflow analysis
-                        var workFlowAnalysisResult = WorkflowManager.Instance.ParseWorkflowDefinition(siteDefinition.Xaml, WorkflowTypes.SP2013);
-                        var workFlowTriggerAnalysisResult = WorkflowManager.Instance.ParseWorkflowTriggers(GetWorkflowPropertyBool(siteDefinition.Properties, "SPDConfig.StartOnCreate"), GetWorkflowPropertyBool(siteDefinition.Properties, "SPDConfig.StartOnChange"), GetWorkflowPropertyBool(siteDefinition.Properties, "SPDConfig.StartManually"));
+                        WorkflowActionAnalysis workFlowAnalysisResult = null;
+                        WorkflowTriggerAnalysis workFlowTriggerAnalysisResult = null;
+                        if (Options.IncludeWorkflowWithDetails(this.ScanJob.Mode))
+                        {
+                            workFlowAnalysisResult = WorkflowManager.Instance.ParseWorkflowDefinition(siteDefinition.Xaml, WorkflowTypes.SP2013);
+                            workFlowTriggerAnalysisResult = WorkflowManager.Instance.ParseWorkflowTriggers(GetWorkflowPropertyBool(siteDefinition.Properties, "SPDConfig.StartOnCreate"), GetWorkflowPropertyBool(siteDefinition.Properties, "SPDConfig.StartOnChange"), GetWorkflowPropertyBool(siteDefinition.Properties, "SPDConfig.StartManually"));
+                        }
 
                         if (siteWorkflowSubscriptions.Count() > 0)
                         {
@@ -227,8 +234,13 @@ namespace SharePoint.Modernization.Scanner.Core.Analyzers
                         var listWorkflowSubscriptions = siteSubscriptions.Where(p => p.DefinitionId.Equals(listDefinition.Id));
 
                         // Perform workflow analysis
-                        var workFlowAnalysisResult = WorkflowManager.Instance.ParseWorkflowDefinition(listDefinition.Xaml, WorkflowTypes.SP2013);
-                        var workFlowTriggerAnalysisResult = WorkflowManager.Instance.ParseWorkflowTriggers(GetWorkflowPropertyBool(listDefinition.Properties, "SPDConfig.StartOnCreate"), GetWorkflowPropertyBool(listDefinition.Properties, "SPDConfig.StartOnChange"), GetWorkflowPropertyBool(listDefinition.Properties, "SPDConfig.StartManually"));
+                        WorkflowActionAnalysis workFlowAnalysisResult = null;
+                        WorkflowTriggerAnalysis workFlowTriggerAnalysisResult = null;
+                        if (Options.IncludeWorkflowWithDetails(this.ScanJob.Mode))
+                        {
+                            workFlowAnalysisResult = WorkflowManager.Instance.ParseWorkflowDefinition(listDefinition.Xaml, WorkflowTypes.SP2013);
+                            workFlowTriggerAnalysisResult = WorkflowManager.Instance.ParseWorkflowTriggers(GetWorkflowPropertyBool(listDefinition.Properties, "SPDConfig.StartOnCreate"), GetWorkflowPropertyBool(listDefinition.Properties, "SPDConfig.StartOnChange"), GetWorkflowPropertyBool(listDefinition.Properties, "SPDConfig.StartManually"));
+                        }
 
                         if (listWorkflowSubscriptions.Count() > 0)
                         {
@@ -337,6 +349,10 @@ namespace SharePoint.Modernization.Scanner.Core.Analyzers
                     }
                 }
 
+                #endregion
+
+                #region 2010 workflow
+
                 // ***********************************************
                 // Site, list and content type level 2010 workflow
                 // ***********************************************
@@ -355,6 +371,17 @@ namespace SharePoint.Modernization.Scanner.Core.Analyzers
                     foreach (var workflowAssociation in list.WorkflowAssociations)
                     {
                         this.sp2010WorkflowAssociations.Add(new SP2010WorkFlowAssociation() { Scope = "List", WorkflowAssociation = workflowAssociation, AssociatedList = list });
+                    }
+                }
+
+                foreach (var list in lists.Where(p => p.ContentTypesEnabled))
+                {
+                    foreach (var listContentType in list.ContentTypes.Where(p => p.WorkflowAssociations.Count > 0))
+                    {
+                        foreach (var workflowAssociation in listContentType.WorkflowAssociations)
+                        {
+                            this.sp2010WorkflowAssociations.Add(new SP2010WorkFlowAssociation() { Scope = "ContentType", WorkflowAssociation = workflowAssociation, AssociatedContentType = listContentType, AssociatedList = list });
+                        }
                     }
                 }
 
@@ -382,10 +409,15 @@ namespace SharePoint.Modernization.Scanner.Core.Analyzers
                             // Perform workflow analysis
                             // If returning null than this workflow template was an OOB workflow one
                             WorkflowActionAnalysis workFlowAnalysisResult = null;
-                            var loadedWorkflow = LoadWorkflowDefinition(cc, workflowTemplate);
-                            if (!string.IsNullOrEmpty(loadedWorkflow?.Item1))
+                            Tuple<string, DateTime> loadedWorkflow = null;
+
+                            if (Options.IncludeWorkflowWithDetails(this.ScanJob.Mode))
                             {
-                                workFlowAnalysisResult = WorkflowManager.Instance.ParseWorkflowDefinition(loadedWorkflow.Item1, WorkflowTypes.SP2010);
+                                loadedWorkflow = LoadWorkflowDefinition(cc, workflowTemplate);
+                                if (!string.IsNullOrEmpty(loadedWorkflow?.Item1))
+                                {
+                                    workFlowAnalysisResult = WorkflowManager.Instance.ParseWorkflowDefinition(loadedWorkflow.Item1, WorkflowTypes.SP2010);
+                                }
                             }
 
                             foreach (var associatedWorkflow in associatedWorkflows)
@@ -394,12 +426,16 @@ namespace SharePoint.Modernization.Scanner.Core.Analyzers
 
                                 // Skip previous versions of a workflow
                                 // TODO: non-english sites will use another string
-                                if (associatedWorkflow.WorkflowAssociation.Name.Contains("(Previous Version:"))
+                                if (associatedWorkflow.WorkflowAssociation.Name.Contains(PreviousWorkflowString(web.Language)))
                                 {
                                     continue;
                                 }
 
-                                var workFlowTriggerAnalysisResult = WorkflowManager.Instance.ParseWorkflowTriggers(associatedWorkflow.WorkflowAssociation.AutoStartCreate, associatedWorkflow.WorkflowAssociation.AutoStartChange, associatedWorkflow.WorkflowAssociation.AllowManual);
+                                WorkflowTriggerAnalysis workFlowTriggerAnalysisResult = null;
+                                if (Options.IncludeWorkflowWithDetails(this.ScanJob.Mode))
+                                {
+                                    workFlowTriggerAnalysisResult = WorkflowManager.Instance.ParseWorkflowTriggers(associatedWorkflow.WorkflowAssociation.AutoStartCreate, associatedWorkflow.WorkflowAssociation.AutoStartChange, associatedWorkflow.WorkflowAssociation.AllowManual);
+                                }
 
                                 WorkflowScanResult workflowScanResult = new WorkflowScanResult()
                                 {
@@ -450,14 +486,18 @@ namespace SharePoint.Modernization.Scanner.Core.Analyzers
                             {
                                 // Perform workflow analysis
                                 WorkflowActionAnalysis workFlowAnalysisResult = null;
-                                var loadedWorkflow = LoadWorkflowDefinition(cc, workflowTemplate);
-                                if (!string.IsNullOrEmpty(loadedWorkflow?.Item1))
+                                WorkflowTriggerAnalysis workFlowTriggerAnalysisResult = null;
+                                Tuple<string, DateTime> loadedWorkflow = null;
+
+                                if (Options.IncludeWorkflowWithDetails(this.ScanJob.Mode))
                                 {
-                                    workFlowAnalysisResult = WorkflowManager.Instance.ParseWorkflowDefinition(loadedWorkflow.Item1, WorkflowTypes.SP2010);
+                                    loadedWorkflow = LoadWorkflowDefinition(cc, workflowTemplate);
+                                    if (!string.IsNullOrEmpty(loadedWorkflow?.Item1))
+                                    {
+                                        workFlowAnalysisResult = WorkflowManager.Instance.ParseWorkflowDefinition(loadedWorkflow.Item1, WorkflowTypes.SP2010);
+                                    }
+                                    workFlowTriggerAnalysisResult = WorkflowManager.Instance.ParseWorkflowTriggers(workflowTemplate.AutoStartCreate, workflowTemplate.AutoStartChange, workflowTemplate.AllowManual);
                                 }
-
-
-                                var workFlowTriggerAnalysisResult = WorkflowManager.Instance.ParseWorkflowTriggers(workflowTemplate.AutoStartCreate, workflowTemplate.AutoStartChange, workflowTemplate.AllowManual);
 
                                 WorkflowScanResult workflowScanResult = new WorkflowScanResult()
                                 {
@@ -508,20 +548,25 @@ namespace SharePoint.Modernization.Scanner.Core.Analyzers
                     {
                         // Skip previous versions of a workflow
                         // TODO: non-english sites will use another string
-                        if (associatedWorkflow.WorkflowAssociation.Name.Contains("(Previous Version:"))
+                        if (associatedWorkflow.WorkflowAssociation.Name.Contains(PreviousWorkflowString(web.Language)))
                         {
                             continue;
                         }
 
                         // Perform workflow analysis
                         WorkflowActionAnalysis workFlowAnalysisResult = null;
-                        var loadedWorkflow = LoadWorkflowDefinition(cc, associatedWorkflow.WorkflowAssociation);
-                        if (!string.IsNullOrEmpty(loadedWorkflow?.Item1))
-                        {
-                            workFlowAnalysisResult = WorkflowManager.Instance.ParseWorkflowDefinition(loadedWorkflow.Item1, WorkflowTypes.SP2010);
-                        }
+                        WorkflowTriggerAnalysis workFlowTriggerAnalysisResult = null;
+                        Tuple<string, DateTime> loadedWorkflow = null;
 
-                        var workFlowTriggerAnalysisResult = WorkflowManager.Instance.ParseWorkflowTriggers(associatedWorkflow.WorkflowAssociation.AutoStartCreate, associatedWorkflow.WorkflowAssociation.AutoStartChange, associatedWorkflow.WorkflowAssociation.AllowManual);
+                        if (Options.IncludeWorkflowWithDetails(this.ScanJob.Mode))
+                        {
+                            loadedWorkflow = LoadWorkflowDefinition(cc, associatedWorkflow.WorkflowAssociation);
+                            if (!string.IsNullOrEmpty(loadedWorkflow?.Item1))
+                            {
+                                workFlowAnalysisResult = WorkflowManager.Instance.ParseWorkflowDefinition(loadedWorkflow.Item1, WorkflowTypes.SP2010);
+                            }
+                            workFlowTriggerAnalysisResult = WorkflowManager.Instance.ParseWorkflowTriggers(associatedWorkflow.WorkflowAssociation.AutoStartCreate, associatedWorkflow.WorkflowAssociation.AutoStartChange, associatedWorkflow.WorkflowAssociation.AllowManual);
+                        }
 
                         WorkflowScanResult workflowScanResult = new WorkflowScanResult()
                         {
@@ -562,7 +607,10 @@ namespace SharePoint.Modernization.Scanner.Core.Analyzers
                             this.ScanJob.ScanErrors.Push(error);
                         }
                     }
+                    
                 }
+
+                #endregion
             }
             catch(Exception ex)
             {
@@ -813,6 +861,66 @@ namespace SharePoint.Modernization.Scanner.Core.Analyzers
 
             return false;
         }
+
+        private static string PreviousWorkflowString(uint language)
+        {
+            switch (language)
+            {
+                case 1033: return "(Previous Version:";
+                case 1164: return "( نسخه گذشته ) :";
+                case 2108: return "(An Leagan Roimhe:";
+                case 1081: return "(पिछला संस्करण:";
+                case 1071: return "(Претходна верзија:";
+                case 1049: return "(предыдущая версия:";
+                case 1051: return "(predchádzajúca verzia:";
+                case 1028: return "(舊版本:";
+                case 1058: return "(Попередня версія:";
+                case 1027: return "(versió anterior:";
+                case 1029: return "(Předchozí verze:";
+                case 1030: return "(Tidligere version:";
+                case 3082: return "(Versión anterior:";
+                case 1069: return "(aurreko bertsioa:";
+                case 1038: return "(Előző verzió:";
+                case 1057: return "(Versi Sebelumnya:";
+                case 1042: return "(이전 버전:";
+                case 1063: return "(ankstesnė versija:";
+                case 1062: return "(iepriekšējā versija:";
+                case 1045: return "(poprzednia wersja:";
+                case 2070:
+                case 1046: return "(Versão Anterior:";
+                case 1048: return "(versiune anterioară:";
+                case 1060: return "(Prejšnja različica:";
+                case 10266: return "(претходна верзија:";
+                case 2074: return "(Prethodna verzija:";
+                case 1054: return "(เวอร์ชันก่อนหน้า:";
+                case 1055: return "(Önceki Sürüm:";
+                case 1025: return "(الإصدار السابق:";
+                case 1068: return "(Əvvəlki Versiya:";
+                case 1026: return "(Предишна версия:";
+                case 1106: return "(Fersiwn Blaenorol:";
+                case 1031: return "(Vorherige Version:";
+                case 1061: return "(eelmine versioon:";
+                case 1035: return "(aiempi versio:";
+                case 1036: return "(version précédente :";
+                case 1110: return "(Versión anterior:";
+                case 1037: return "(גירסה קודמת:";
+                case 1050: return "(Prethodna verzija:";
+                case 1040: return "(versione precedente:";
+                case 1041: return "(以前のバージョン:";
+                case 1087: return "(Алдыңғы нұсқа:";
+                case 1086: return "(Versi Sebelumnya:";
+                case 1044: return "(Tidligere versjon:";
+                case 1043: return "(vorige versie:";
+                case 1053: return "(Tidigare version:";
+                case 9242: return "(Prethodna verzija:";
+                case 1032: return "(Προηγούμενη έκδοση:";
+                case 1066: return "(Phiên bản Trước:";
+                case 2052: return "(以前版本:";
+                default:
+                    return "(Previous Version:";
+            }
+        }
+
         #endregion
     }
 }
